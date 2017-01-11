@@ -10,7 +10,7 @@ For <B>5G band Wi-Fi and BLE feature:</B>
 
 
 
-## Software Development Guide (https://docs.labs.mediatek.com/resource/mt7687-mt7697/en)##
+## Software Development Guide ##
 [Build Environment Manual](https://labs.mediatek.com/en/download/tvGNiWTA)
 
 [Open Source Components’ Guide](https://labs.mediatek.com/en/download/j0n6Kub9)
