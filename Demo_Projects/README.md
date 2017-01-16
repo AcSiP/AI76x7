@@ -16,3 +16,4 @@ b.We porting simple command to demo this project,please follow these instructurt
     > "tcp_demo server" command.
 5. Set dev2 to tcp client and got data form uart.
     > "tcp_demo client" command.
+6. Please input one character form Dev2,and Dev1 would got it.
