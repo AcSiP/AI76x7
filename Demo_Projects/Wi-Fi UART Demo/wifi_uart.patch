@@ -1,0 +1,282 @@
+diff --git a/driver/board/mt76x7_hdk/wifi/inc/wifi_cli.h b/driver/board/mt76x7_hdk/wifi/inc/wifi_cli.h
+index 4685429..23d285f 100755
+--- a/driver/board/mt76x7_hdk/wifi/inc/wifi_cli.h
++++ b/driver/board/mt76x7_hdk/wifi/inc/wifi_cli.h
+@@ -724,7 +724,7 @@ extern uint8_t _smart_config_test(uint8_t len, char *param[]);
+ #endif
+ extern cmd_t   wifi_pub_cli[];
+ extern cmd_t   wifi_mq_get_cli[];
+-
++extern cmd_t   tcp_demo_cli[];
+ #if defined(MTK_WIFI_WPS_ENABLE)
+ 
+ /**
+@@ -799,7 +799,11 @@ uint8_t wifi_wps_connection_by_pbc_ex(uint8_t len, char *param[]);
+ uint8_t wifi_wps_connection_by_pin_ex(uint8_t len, char *param[]);
+ 
+ #endif/*MTK_WIFI_WPS_ENABLE*/
+-
++#define ACSIP_TCP_DEMO_ENTRY          { "tcp_demo",    "TCP demo test",     NULL,   tcp_demo_cli },
++uint8_t tcp_demo_wifi_sta(uint8_t len, char *param[]);
++uint8_t tcp_demo_wifi_ap(uint8_t len, char *param[]);
++uint8_t run_tcp_server(uint8_t len, char *param[]);
++uint8_t run_tcp_client(uint8_t len, char *param[]);
+ 
+ #ifdef __cplusplus
+ }
+diff --git a/driver/board/mt76x7_hdk/wifi/src/wifi_cli.c b/driver/board/mt76x7_hdk/wifi/src/wifi_cli.c
+index ae2a121..67591f0 100755
+--- a/driver/board/mt76x7_hdk/wifi/src/wifi_cli.c
++++ b/driver/board/mt76x7_hdk/wifi/src/wifi_cli.c
+@@ -48,12 +48,26 @@
+ #include "wifi_rx_desc.h"
+ #include "get_profile_string.h"
+ #include "misc.h"
+-
++#include "lwip/sockets.h"
+ #if defined(MTK_SMTCN_ENABLE)
+ #include "smt_conn.h"
+ #endif
+ #include "inband_queue.h"
+-
++#define WELCOME_INFO  "\r\n\r\nHello SAY something\r\n"
++#define WELCOME_INFO_SIZE sizeof(WELCOME_INFO)
++#define VFIFO_SIZE              256
++#define START_INFO  "\r\n\r\nStart Input\r\n"
++#define START_INFO_SIZE sizeof(START_INFO)
++#define Demo_use_port HAL_UART_1
++void data_uart_port1_start_data_transfer (void);
++static volatile bool g_uart_receive_event = false;
++static uint8_t buffer_uart[VFIFO_SIZE];
++static void uart_read_from_input(hal_uart_callback_event_t event, void *user_data)
++{
++   if (event == HAL_UART_EVENT_READY_TO_READ) {
++        g_uart_receive_event = true;
++    }
++}
+ #define WIFI_CLI_RETURN_STRING(ret) ((ret>=0)?"Success":"Error")
+ cmd_t   wifi_config_set_pub_cli[] = {
+     { "opmode",         "STA/AP/Dual",      wifi_config_set_opmode_ex },
+@@ -100,7 +114,13 @@ cmd_t   wifi_config_get_pub_cli[] = {
+     { "listen",         "listen interval",  wifi_config_get_listen_interval_ex },
+     { NULL }
+ };
+-
++cmd_t   tcp_demo_cli[] = {
++    { "sta",         "set dev to station mode",      tcp_demo_wifi_sta },
++    { "ap",           "set dev to soft ap",          tcp_demo_wifi_ap },
++    { "server",          "run tcp server",           run_tcp_server },
++    { "client",        "run tcp client",             run_tcp_client },
++    { NULL }
++};
+ cmd_t   wifi_connect_set_pub_cli[] = {
+     { "scan",       "start/stop scan",                      wifi_connect_set_scan_ex}, /*need implement base on WiFi Scan API*/
+     { "connection", "connect/disconnect to AP",             wifi_connect_set_connection_ex},
+@@ -2328,3 +2348,115 @@ uint8_t _smart_config_test(uint8_t len, char *param[])
+ 
+ #endif /*MTK_WIFI_WPS_ENABLE*/
+ 
++uint8_t tcp_demo_wifi_sta(uint8_t len, char *param[])
++{
++    uint8_t status = 0;
++    int32_t ret = 0;
++    uint8_t mode = 0;
++	//set mode
++    wifi_config_set_opmode(WIFI_MODE_STA_ONLY);
++	//to set the SSID of the AP Client port,
++	wifi_config_set_ssid(WIFI_PORT_STA, "test1", strlen("test1"));
++    wifi_config_set_wpa_psk_key(WIFI_PORT_STA, "12345678", strlen("12345678"));
++    wifi_config_reload_setting();
++    cli_puts("set dev to station finish !!!!\n");
++    return status;
++}
++uint8_t tcp_demo_wifi_ap(uint8_t len, char *param[])
++{
++	//set mode
++	wifi_set_opmode(WIFI_MODE_AP_ONLY); //For SDK4.0 SoftAP run dhcp server.
++    wifi_config_set_opmode(WIFI_MODE_AP_ONLY);
++	//to set the SSID of the AP Client port,
++	wifi_config_set_ssid(WIFI_PORT_AP, "test1", strlen("test1"));
++    wifi_config_set_security_mode(WIFI_PORT_AP, WIFI_AUTH_MODE_WPA2_PSK,WIFI_ENCRYPT_TYPE_AES_ENABLED);
++    wifi_config_set_wpa_psk_key(WIFI_PORT_AP, "12345678", strlen("12345678"));
++    wifi_config_set_channel(WIFI_PORT_AP, 6);
++    wifi_config_reload_setting();
++    cli_puts("wifi soft AP set finish !!!!\n");
++    return 0;
++}
++uint8_t run_tcp_server(uint8_t len, char *param[])
++{
++    int sock0;
++    struct sockaddr_in addr;
++    struct sockaddr_in client;
++           socklen_t socketlen;
++    int sock_client;
++    char buf[32];
++    cli_puts("run Tcp server !!!!\n");
++    /* create a socket */
++    sock0 = lwip_socket(AF_INET, SOCK_STREAM, 0);
++    /* setup socket */
++    addr.sin_family = AF_INET;
++    addr.sin_port = htons(12345);
++    addr.sin_addr.s_addr = INADDR_ANY;
++    bind(sock0, (struct sockaddr*)&addr, sizeof(addr));
++    cli_puts("\t[Info] binding...\n");
++    listen(sock0, 5);
++    cli_puts("\t[Info] listening...\n");
++    cli_puts("\t[Info] wait for connection...\n");
++    socketlen = sizeof(client);
++    sock_client = accept(sock0, (struct sockaddr *)&client, &socketlen);
++    char *paddr_str = inet_ntoa(client.sin_addr);
++    printf("\t[Info] Receive connection from %s...\n", paddr_str);
++    cli_puts("\t[Info] Say hello ...\n");
++    write(sock_client, WELCOME_INFO, WELCOME_INFO_SIZE);
++    //Receive data from client
++    os_memset(buf, 0, sizeof(buf));
++    read(sock_client, buf, sizeof(buf));
++    printf("\t[Info] Receive  %s from client \n", buf);
++    close(sock_client);
++    /* close socket */
++    cli_puts("\t[Info] Close self connection...\n");
++    close(sock_client);
++    close(sock0);
++    return 0;
++}
++uint8_t run_tcp_client(uint8_t len, char *param[])
++{
++    struct sockaddr_in server;
++    int sock;
++    char buf[32];
++    int n;
++    /* create socket */
++    sock = socket(AF_INET, SOCK_STREAM, 0);
++    /*filled structure data for connection */
++    server.sin_family = AF_INET;
++    server.sin_port = htons(12345);
++    /* connect to server ip 10.10.10.1 */
++    inet_pton(AF_INET, "10.10.10.1", &server.sin_addr.s_addr);
++    /* connecting */
++    connect(sock, (struct sockaddr *)&server, sizeof(server));
++    /* receive data from server */
++    os_memset(buf, 0, sizeof(buf));
++    n = read(sock, buf, sizeof(buf));
++    printf("\t[Info] Receive %d bytes: %s\n", n, buf);
++    hal_uart_send_dma(Demo_use_port,buf, sizeof(buf));
++    data_uart_port1_start_data_transfer(); //get data from user
++    write(sock, buffer_uart, sizeof(buffer_uart));
++  /* close socket */
++  close(sock);
++  return 0;
++}
++void data_uart_port1_start_data_transfer (void)
++{
++    uint32_t length;
++    hal_uart_status_t status;
++    uint8_t s[256] ;
++	status = hal_uart_register_callback(Demo_use_port, uart_read_from_input, NULL);
++	if (status == HAL_UART_STATUS_OK)
++	{
++        hal_uart_send_dma(Demo_use_port, (const uint8_t *)START_INFO, START_INFO_SIZE);     //send welcome massage
++        while (1) {
++            if (g_uart_receive_event == true) {
++               length = hal_uart_get_available_receive_bytes(Demo_use_port);
++               hal_uart_receive_dma(Demo_use_port, buffer_uart, length);
++               hal_uart_send_dma(Demo_use_port, buffer_uart, length);
++               break;
++	        }
++		}
++    }
++    else
++    printf("\t[Info] Fail Uart1\n");
++}
+diff --git a/project/mt7687_hdk/apps/iot_sdk_demo/inc/app_cli_table.h b/project/mt7687_hdk/apps/iot_sdk_demo/inc/app_cli_table.h
+index 3c28994..ed4ef48 100755
+--- a/project/mt7687_hdk/apps/iot_sdk_demo/inc/app_cli_table.h
++++ b/project/mt7687_hdk/apps/iot_sdk_demo/inc/app_cli_table.h
+@@ -55,8 +55,8 @@
+ #define APP_CLI_CMDS     WIFI_PUB_CLI_ENTRY \
+                          WIFI_PUB_CLI_SMNT_ENTRY \
+                          PING_CLI_ENTRY \
+-                         IPERF_CLI_ENTRY
+-
++                         IPERF_CLI_ENTRY \
++						ACSIP_TCP_DEMO_ENTRY
+ 
+ #ifdef __cplusplus
+  }
+diff --git a/project/mt7687_hdk/apps/iot_sdk_demo/src/sys_init.c b/project/mt7687_hdk/apps/iot_sdk_demo/src/sys_init.c
+index 2f4fb7b..5801a75 100755
+--- a/project/mt7687_hdk/apps/iot_sdk_demo/src/sys_init.c
++++ b/project/mt7687_hdk/apps/iot_sdk_demo/src/sys_init.c
+@@ -57,7 +57,28 @@
+ #ifdef MTK_NVDM_ENABLE
+ #include "nvdm.h"
+ #endif
+-
++#define SEND_THRESHOLD_SIZE (50)
++#define RECEIVE_THRESHOLD_SIZE (150)
++#define RECEIVE_ALERT_SIZE (30)
++#define UART_PROMPT_INFO "\r\n\r\nUart1 start work\r\n"
++#define UART_PROMPT_INFO_SIZE sizeof(UART_PROMPT_INFO)
++#define HAL_GPIO_36_UART2_RX_CM4    7
++#define HAL_GPIO_36_GPIO36   8
++#define HAL_GPIO_36_PWM19   9
++#define HAL_GPIO_37_EINT20   3
++#define HAL_GPIO_37_UART2_TX_CM4    7
++//#ifdef USE_UART_VFIFO
++#define VFIFO_SIZE              256
++#define VFIFO_ALERT_LENGTH      0
++//#endif
++//Uart port 1 porting
++/* Private variables ---------------------------------------------------------*/
++static uint8_t g_uart_send_buffer[VFIFO_SIZE];
++static uint8_t g_uart_receive_buffer[VFIFO_SIZE];
++static volatile bool g_uart_receive_event = false;
++/* Private functions ---------------------------------------------------------*/
++void data_uart_init(void);
++//Uart port 1 porting
+ extern void tickless_init(void);
+ 
+ /**
+@@ -217,8 +238,40 @@ void system_init(void)
+ #ifdef MTK_NVDM_ENABLE
+     nvdm_init();
+ #endif
+-
++    data_uart_init();
+     /* generate random seed */
+     _main_sys_random_init();
+ }
+-
++// porting data uart port 1
++void data_uart_init(void)
++{
++    hal_uart_config_t basic_config;
++    hal_uart_dma_config_t dma_config;
++    hal_gpio_pin_t gpio_pin;
++     LOG_I(common, "Data Uart port 1 init\n");
++   /* Step1: Call hal_pinmux_set_function() to set GPIO pinmux, if EPT tool was not used to configure the related pinmux.*/
++    gpio_pin = HAL_GPIO_36;
++    hal_gpio_init(gpio_pin);
++    hal_pinmux_set_function(HAL_GPIO_36, HAL_GPIO_36_UART2_RX_CM4);
++    gpio_pin = HAL_GPIO_37;
++    hal_gpio_init(gpio_pin);
++    hal_pinmux_set_function(HAL_GPIO_37, HAL_GPIO_37_UART2_TX_CM4);
++    /* Configure UART port with basic function */
++    basic_config.baudrate = HAL_UART_BAUDRATE_115200;
++    basic_config.parity = HAL_UART_PARITY_NONE;
++    basic_config.stop_bit = HAL_UART_STOP_BIT_1;
++    basic_config.word_length = HAL_UART_WORD_LENGTH_8;
++    hal_uart_init(HAL_UART_1, &basic_config);
++    /*Step2: Configure UART port to dma mode. */
++    dma_config.receive_vfifo_alert_size = RECEIVE_ALERT_SIZE;
++    dma_config.receive_vfifo_buffer = g_uart_receive_buffer;
++    dma_config.receive_vfifo_buffer_size = VFIFO_SIZE;
++    dma_config.receive_vfifo_threshold_size = RECEIVE_THRESHOLD_SIZE;
++    dma_config.send_vfifo_buffer = g_uart_send_buffer;
++    dma_config.send_vfifo_buffer_size = VFIFO_SIZE;
++    dma_config.send_vfifo_threshold_size = SEND_THRESHOLD_SIZE;
++    hal_uart_set_dma(HAL_UART_1, &dma_config);
++    //hal_uart_register_callback(HAL_UART_1, uart_read_from_input, NULL);
++    /* Print the prompt content to the test port */
++    hal_uart_send_dma(HAL_UART_1, (const uint8_t *)UART_PROMPT_INFO, UART_PROMPT_INFO_SIZE);
++}
