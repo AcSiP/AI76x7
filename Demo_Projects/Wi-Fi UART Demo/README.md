@@ -1,6 +1,6 @@
 #1.How to use this patch?
 ###a.Please download Linkit_SDK_V4.1.0_public form https://labs.mediatek.com/en/download/AThAO9Og  
-###b.Apply it!
+###b.Use git command to apply it. => git apply wifi_uart.patch
 ___
 #2.We porting simple command to demo this project,please follow these instructurtions as below.
 ###a.Please prepare two devices.
