@@ -26,7 +26,7 @@ EK-AI7697H, aka AI7697H XBee,  is a low-cost and easy to use Internet of Things 
 <BR>
 <BR>
 
-<H2> EK-AI7697H Hardware Description</H2>
+<H2> Hardware Description</H2>
 AI7687H XBee includes a main board and a AI7697H stamp module. The AI7697H stamp module is mounted on the main board.
 <BR>
 
@@ -46,7 +46,27 @@ AI7687H XBee includes a main board and a AI7697H stamp module. The AI7697H stamp
 <BR>
 
 <H2> Hardware Configuration</H2>
-<B>1. </B> Use Micro USB cable Connect from computer to EK-AI7697H <BR>
-<B>2. </B> Micro USB is UART port to connect AI7697H and supply power form PC (GPIO2/GPIO3；UART baud rate：57600 bps) <BR>
-<B>3. </B> BAT connector only supported 3.7V 200-1000mAh Li-ion battery <BR>
+- Setting jumpers on location [3.3V] and [GND] for supply power from USB
+- Setting jumpers on location [GPIO2] and [GPIO3] for UART debug port
+- Setting jumper on location [NRST] for RST key function
+- BAT connector only supported 3.7V 200-1000mAh Li-ion battery
+- Use Micro USB cable Connect from PC to EK-AI7697H <BR>
+- Open serial console application, ex Putty or TeraTerm, with 57600 bps(8N1) <BR>
+- Configuring Normal / Recovery mode
+<BR>
+
+<H2> Recovery Mode</H2>
+<B>1. </B> Setting jumper on on location [CON31]<BR>
+<B>2. </B> Press RST key to trigger a hardware reset. Debug console shows “ccc” always.<BR>
+<BR>
+
+Recovery mode is used for two purpose:
+- RF performance test (with Mediatek QA tool)
+- Update firmware (with MT76x7_Flash_Tool)
+<BR>
+
+
+<H2> Normal Mode</H2>
+<B>1. </B> Remove jumper on on location [CON31]<BR>
+<B>2. </B> Press RST key to trigger a hardware reset.<BR>
 <BR>
