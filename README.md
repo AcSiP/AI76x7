@@ -8,7 +8,7 @@ For <B>2.4G band Wi-Fi:</B>
 For <B>5G band Wi-Fi and BLE feature:</B>
 	Please contact sales of AcSiP Technology Corp.
 
-
+<BR>
 
 ## Software Development Guide ##
 [Build Environment Manual](https://labs.mediatek.com/en/download/tvGNiWTA)
@@ -21,7 +21,14 @@ For <B>5G band Wi-Fi and BLE feature:</B>
 
 [MT7687 API Reference](http://labs.mediatek.com/api/mt7687)
 
+<BR>
 
 ## Software Tools / Utilities ##
 ###LinkIt 7687 Flash Tool User’s Manual###
 MT7687 FlashTool is located in <sdk_root>/tools/PC_tool_Win.zip
+
+<BR>
+
+## Development Kits ##
+[EK-AI7697H (AI7697H XBee) User Manual](Development_Kits/EK-AI7697_Manual.md)
+
