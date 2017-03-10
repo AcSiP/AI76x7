@@ -70,3 +70,59 @@ Recovery mode is used for two purpose:
 <B>1. </B> Remove jumper on on location [CON31]<BR>
 <B>2. </B> Press RST key to trigger a hardware reset.<BR>
 <BR>
+
+Normal mode is the normal operation environment for user application.<BR>
+Here is the example operation.<BR>
+<BR>
+
+<H3> Wi-Fi connect to an AP router (aka station mode)</H3>
+- SSID of Target AP router = <B>AcSiP_Public</B>
+- Pre-shared key = <B>1zx2#CV$</B>
+- Auth Mode = <B>WPA2PSK</B>
+- Encrypt Type = <B>AES</B>
+
+<BR>
+<B>1. </B> Change operation mode to station mode<BR>
+<B>wifi config set opmode 1</B><BR>
+<BR>
+<B>2. </B> Set SSID<BR>
+<B>wifi config set ssid 0 AcSiP_Public</B><BR>
+<BR>
+<B>3. </B> Configure auth information<BR>
+<B>wifi config set ssid psk 0 7 8 "1zx2#CV$"</B><BR>
+<BR>
+The parameter definition of <B>wifi config set ask</B> list below:<BR>
+wifi config set psk <B> [port] [auth mode] [encrypt type] [psk key] </B><BR>
+	<TABLE>
+	<TR align="center" valign="center">
+		<TD><B> Combination Type </B></TD>
+		<TD><B> Auth Mode </B></TD>
+		<TD><B> Encrypt Type </B></TD>
+	</TR>
+ <TR align="center" valign="center"><TD> OPEN </TD>                    <TD> 0 </TD>	<TD> 1 </TD> </TR>
+ <TR align="center" valign="center"><TD> WPA2PSK(AES) </TD>            <TD> 7 </TD>	<TD> 6 </TD> </TR>
+ <TR align="center" valign="center"><TD> WPA2PSK(TKIP) </TD>           <TD> 7 </TD>	<TD> 4 </TD> </TR>
+ <TR align="center" valign="center"><TD> WPA2PSK(AES+TKIP) </TD>       <TD> 7 </TD>	<TD> 8 </TD> </TR>
+ <TR align="center" valign="center"><TD> WPAPSK(AES) </TD>             <TD> 4 </TD>	<TD> 6 </TD> </TR>
+ <TR align="center" valign="center"><TD> WPAPSK(TKIP) </TD>            <TD> 4 </TD>	<TD> 4 </TD> </TR>
+ <TR align="center" valign="center"><TD> WPAPSK+WPA2PSK(AES+TKIP) </TD><TD> 9 </TD>	<TD> 8 </TD> </TR>
+ <TR align="center" valign="center"><TD> WEP(OPEN) </TD>               <TD> 0 </TD>	<TD> 0 </TD> </TR>
+	</TABLE>
+
+
+<BR>
+<B>4. </B> Apply changes<BR>
+<B>wifi config set reload</B><BR>
+<BR>
+<B>5. </B> Wait for few seconds, the message like below would show up if connecting to the AP successfully:<BR>
+<I>[T: 5066238 M: common C: INFO F: ip_change_call_back L: 441]: ************************</I><BR>
+
+<I>[T: 5066239 M: common C: INFO F: ip_change_call_back L: 442]: <B>DHCP got IP:</B>192.168.20.67</I><BR>
+
+<I>[T: 5066239 M: common C: INFO F: ip_change_call_back L: 443]: ************************</I><BR>
+
+<BR>
+<B>6. </B> Get RSSI<BR>
+<B>wifi connect get rssi</B><BR>
+<BR>
+<BR>
