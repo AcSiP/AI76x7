@@ -10,7 +10,7 @@ EK-AI7697H, aka AI7697H XBee,  is a low-cost and easy to use Internet of Things 
 - Main Chip: MT7697N
 - ARM Cortex M4 MCU with FPU with up to 192MHz clock speed
 - Embedded 352KB SRAM and 64KB boot ROM
-- Support 2.4G Wi-Fi IEEE 802.11 b/g/n
+- Support 2.4G Wi-Fi IEEE 802.11b/g/n
 - Hardware crypto engines including AES, DES/3DES/ SHA2 for network security
 - Internal switch and control for Rx diversity
 - Bluetooth Low Energy
@@ -75,7 +75,7 @@ Normal mode is the normal operation environment for user application.<BR>
 Here is the example operation.<BR>
 <BR>
 
-<H3> Wi-Fi connect to an AP router (aka station mode)</H3>
+<H3> EK-AI7697 connect to an AP router (aka station mode)</H3>
 - SSID of Target AP router = <B>AcSiP_Public</B>
 - Pre-shared key = <B>1zx2#CV$</B>
 - Auth Mode = <B>WPA2PSK</B>
@@ -99,14 +99,14 @@ wifi config set psk <B> [port] [auth mode] [encrypt type] [psk key] </B><BR>
 		<TD><B> Auth Mode </B></TD>
 		<TD><B> Encrypt Type </B></TD>
 	</TR>
- <TR align="center" valign="center"><TD> OPEN </TD>                    <TD> 0 </TD>	<TD> 1 </TD> </TR>
- <TR align="center" valign="center"><TD> WPA2PSK(AES) </TD>            <TD> 7 </TD>	<TD> 6 </TD> </TR>
- <TR align="center" valign="center"><TD> WPA2PSK(TKIP) </TD>           <TD> 7 </TD>	<TD> 4 </TD> </TR>
- <TR align="center" valign="center"><TD> WPA2PSK(AES+TKIP) </TD>       <TD> 7 </TD>	<TD> 8 </TD> </TR>
- <TR align="center" valign="center"><TD> WPAPSK(AES) </TD>             <TD> 4 </TD>	<TD> 6 </TD> </TR>
- <TR align="center" valign="center"><TD> WPAPSK(TKIP) </TD>            <TD> 4 </TD>	<TD> 4 </TD> </TR>
- <TR align="center" valign="center"><TD> WPAPSK+WPA2PSK(AES+TKIP) </TD><TD> 9 </TD>	<TD> 8 </TD> </TR>
- <TR align="center" valign="center"><TD> WEP(OPEN) </TD>               <TD> 0 </TD>	<TD> 0 </TD> </TR>
+        <TR align="center" valign="center"><TD> OPEN </TD>                    <TD> 0 </TD>	<TD> 1 </TD> </TR>
+        <TR align="center" valign="center"><TD> WPA2PSK(AES) </TD>            <TD> 7 </TD>	<TD> 6 </TD> </TR>
+        <TR align="center" valign="center"><TD> WPA2PSK(TKIP) </TD>           <TD> 7 </TD>	<TD> 4 </TD> </TR>
+        <TR align="center" valign="center"><TD> WPA2PSK(AES+TKIP) </TD>       <TD> 7 </TD>	<TD> 8 </TD> </TR>
+        <TR align="center" valign="center"><TD> WPAPSK(AES) </TD>             <TD> 4 </TD>	<TD> 6 </TD> </TR>
+        <TR align="center" valign="center"><TD> WPAPSK(TKIP) </TD>            <TD> 4 </TD>	<TD> 4 </TD> </TR>
+        <TR align="center" valign="center"><TD> WPAPSK+WPA2PSK(AES+TKIP) </TD><TD> 9 </TD>	<TD> 8 </TD> </TR>
+        <TR align="center" valign="center"><TD> WEP(OPEN) </TD>               <TD> 0 </TD>	<TD> 0 </TD> </TR>
 	</TABLE>
 
 
@@ -125,4 +125,61 @@ wifi config set psk <B> [port] [auth mode] [encrypt type] [psk key] </B><BR>
 <B>6. </B> Get RSSI<BR>
 <B>wifi connect get rssi</B><BR>
 <BR>
+<BR>
+<BR>
+<H3> EK-AI7697 works as an Wi-Fi AP (aka AP mode)</H3>
+<BR>
+<B>1. </B> Change operation mode to AP mode<BR>
+<B>wifi config set opmode 2</B><BR>
+<BR>
+<B>2. </B> Change wireless mode<BR>
+<B>wifi config set wirelessmode 1 [wireless mode]</B><BR>
+  <TABLE>
+    <TR align="center" valign="center"><TD><B> value </B></TD>  <TD align="left" ><B> wireless mode </B></TD> </TR>
+    <TR align="center" valign="center">   <TD> 0 </TD> <TD align="left" > 802.11b/g mixed </TD></TR>
+    <TR align="center" valign="center">   <TD> 1 </TD> <TD align="left" > 802.11b only </TD></TR>
+    <TR align="center" valign="center">   <TD> 2 </TD> <TD align="left" > 802.11a only (5G band, not support)</TD></TR>
+    <TR align="center" valign="center">   <TD> 3 </TD> <TD align="left" > 802.11a/b/g mixed (not support) </TD></TR>
+    <TR align="center" valign="center">   <TD> 4 </TD> <TD align="left" > 802.11g only </TD></TR>
+    <TR align="center" valign="center">   <TD> 5 </TD> <TD align="left" > 802.11a/b/g/n (both band, not support) </TD></TR>
+    <TR align="center" valign="center">   <TD> 6 </TD> <TD align="left" > 802.11n 2.4G band only </TD></TR>
+    <TR align="center" valign="center">   <TD> 7 </TD> <TD align="left" > 802.11gn mixed </TD></TR>
+    <TR align="center" valign="center">   <TD> 8 </TD> <TD align="left" > 802.11an mixed (5G band, not support)</TD></TR>
+    <TR align="center" valign="center">   <TD> 9 </TD> <TD align="left" > 802.11b/g/n mixed </TD></TR>
+    <TR align="center" valign="center">   <TD> 10 </TD><TD align="left" > 802.11a/g/n mixed (not support)</TD></TR>
+    <TR align="center" valign="center">   <TD> 11 </TD><TD align="left" > 802.11n 5G band only (not support) </TD></TR>
+  </TABLE>
+<BR>
+
+<B>3. </B> Configure Country<BR>
+<B>wifi config set country [band] [region]</B><BR>
+ - band<BR>
+  0 = 2.4GHz<BR>
+  1 = 5GHz<BR>
+<BR>
+ - region (for 2.4G band)<BR>
+  0 = Channel 1 ~ 11<BR>
+  1 = Channel 1 ~ 13<BR>
+  2 = Channel 10 ~ 11<BR>
+  3 = Channel 10 ~ 13<BR>
+  4 = Channel 14<BR>
+  5 = Channel 1 ~ 14<BR>
+  6 = Channel 3 ~ 9<BR>
+  7 = Channel 5 ~ 13<BR>
+<BR>
+
+<B>4. </B> Change channel<BR>
+<B>wifi config set ch [channel number]</B><BR>
+
+<B>5. </B> Change bandwidth<BR>
+<B>wifi config set bw [bandwidth]</B><BR>
+ - bandwidth<BR>
+  0 = 20MHz<BR>
+  1 = 40MHz<BR>
+<BR>
+
+<B>6. </B> Apply changes<BR>
+<B>wifi config set reload</B><BR>
+<BR>
+After AI7697H reboot, the other Wi-Fi device can scan and connect it.
 <BR>
