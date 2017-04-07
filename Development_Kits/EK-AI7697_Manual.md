@@ -56,7 +56,7 @@ AI7687H XBee includes a main board and a AI7697H stamp module. The AI7697H stamp
 - Setting jumper on location [NRST] for RST key function
 - BAT connector only supported 3.7V 200-1000mAh Li-ion battery
 - Use Micro USB cable Connect from PC to EK-AI7697H <BR>
-- Open serial console application, ex Putty or TeraTerm, with 57600 bps(8N1) <BR>
+- Open serial console application, ex Putty or TeraTerm, with <B>115200</B> bps(8N1) <BR>
 - Configuring Normal / Recovery mode
 <BR>
 
