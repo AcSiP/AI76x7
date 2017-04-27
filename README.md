@@ -23,9 +23,12 @@ For <B>5G band Wi-Fi and BLE feature:</B>
 
 <BR>
 
-## Software Tools / Utilities ##
-###LinkIt 7687 Flash Tool User’s Manual###
+<h2> Software Tools / Utilities </h2>
+
+<h3> LinkIt 7687 Flash Tool User’s Manual </h3>
+
 MT7687 FlashTool is located in <sdk_root>/tools/PC_tool_Win.zip
+
 
 <BR>
 
